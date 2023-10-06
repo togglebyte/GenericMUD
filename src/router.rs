@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use crate::mpsc::{Receiver, Sender};
+use crate::mpsc::{RouterReceiver, RouterSender, ClientSender};
 use crate::commands::Command;
 use crate::player::PlayerId;
 use crate::room::RoomId;
 
-pub async fn start_router(rx: Receiver) {
+pub async fn start_router(rx: RouterReceiver) {
     Router::new(rx).start().await;
 }
 
@@ -18,11 +18,10 @@ pub enum Address {
 }
 
 #[derive(Debug)]
-pub enum Message {
-    Command(Command, Address),
-    Feedback(String, Address),
+pub enum RouterMessage {
+    Command { command: Command, sender: Address },
     Disconnect(PlayerId),
-    Register(Sender, Address),
+    Register(ClientSender, Address),
     Tick(Duration),
 }
 
@@ -33,12 +32,12 @@ pub enum SenderId {
 
 #[derive(Debug)]
 struct Router { 
-    rx: Receiver,
-    inner: HashMap<Address, Sender> 
+    rx: RouterReceiver,
+    inner: HashMap<Address, ClientSender> 
 }
 
 impl Router {
-    fn new(rx: Receiver) -> Self {
+    fn new(rx: RouterReceiver) -> Self {
         Self {
             rx,
             inner: HashMap::new() 
@@ -53,16 +52,20 @@ impl Router {
         }
     }
 
-    async fn route_message(&mut self, msg: Message) {
+    async fn route_message(&mut self, msg: RouterMessage) {
 
         match msg {
-            Message::Register(tx, addr) => {
+            RouterMessage::Register(tx, addr) => {
                 log::info!("registered {addr:?}");
                 self.inner.insert(addr, tx);
             }
-            // Command(cmd, address) => {
-            // }
-            _ => {} // Message::Command(
+            RouterMessage::Command { command, sender } => match command {
+                Command::Tell(data) => {
+                    //
+                }
+                // Command::Say(say) => {}
+            }
+            _ => {}
         }
     }
 }

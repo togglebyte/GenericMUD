@@ -1,8 +1,16 @@
-use crate::router::Message;
+use crate::router::RouterMessage;
+use crate::client;
 
-pub type Sender = flume::Sender<Message>;
-pub type Receiver = flume::Receiver<Message>;
+pub type ClientSender = flume::Sender<client::Message>;
+pub type ClientReceiver = flume::Receiver<client::Message>;
 
-pub fn unbounded() -> (Sender, Receiver) {
+pub type RouterSender = flume::Sender<RouterMessage>;
+pub type RouterReceiver = flume::Receiver<RouterMessage>;
+
+pub fn unbounded_client() -> (ClientSender, ClientReceiver) {
+    flume::unbounded()
+}
+
+pub fn unbounded_router() -> (RouterSender, RouterReceiver) {
     flume::unbounded()
 }

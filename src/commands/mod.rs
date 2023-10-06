@@ -7,7 +7,7 @@ mod tell;
 #[derive(Debug)]
 pub enum Command {
     Tell(Tell),
-    Say(RoomId, String),
+    // Say(Say),
 }
 
 fn parse_command(player_id: PlayerId, ident: &str, args: Option<&str>) -> Option<Command> {
